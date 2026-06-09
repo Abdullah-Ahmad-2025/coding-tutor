@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from backend.api.execute import router
 
 # Create the FastAPI application
 app = FastAPI(title="Coding Tutor")
@@ -17,6 +18,8 @@ app.add_middleware(
 @app.get("/health")
 def health():
     return {"status": "ok", "message": "Backend running"}
+
+app.include_router(router)
 
 # If you run this file directly, start the server
 if __name__ == "__main__":

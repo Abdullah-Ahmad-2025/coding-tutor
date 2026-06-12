@@ -10,6 +10,7 @@ class User(Base):
     id = Column(String, primary_key=True)
     email = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)   # added this line for storing hashed password
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Problem(Base):

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api.execute import router as execute_router
 from backend.api.problems import router as problems_router  # added this
 from backend.api.auth import router as auth_router # added this for authentication
+from backend.api.progress import router as progress_router 
 
 app = FastAPI(title="Coding Tutor")
 
@@ -21,3 +22,4 @@ def health():
 app.include_router(execute_router)
 app.include_router(problems_router)  # added this
 app.include_router(auth_router)
+app.include_router(progress_router)

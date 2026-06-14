@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
 import uuid
 
 from backend.services.code_executor import CodeExecutor
+from backend.services.mistake_detector import MistakeDetector
+from backend.services.knowledge_tracker import KnowledgeTracker
 from backend.models.schema import Problem, Submission, User
 from backend.database import get_db
 
@@ -26,33 +27,44 @@ class ExecuteResponse(BaseModel):
     passed: bool
     passed_count: int
     total_count: int
-    results: List[TestResult]
+    results: list
+    mistakes: list = []
+    primary_mistake: str = ""
+    mistake_details: list = []
 
 @router.post("/execute", response_model=ExecuteResponse)
-
 async def execute_code(req: ExecuteRequest, db: Session = Depends(get_db)):
-    """
-    Execute user code against problem's test cases.
-    Stores submission and returns results.
-    """
-    # 1. Fetch the problem from database
+    # Fetch problem and user
     problem = db.query(Problem).filter(Problem.id == req.problem_id).first()
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
 
-    # 2. Fetch the user 
     user = db.query(User).filter(User.id == req.user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # Auto-create user for development (optional)
+        user = User(id=req.user_id, email=f"{req.user_id}@temp.com", name="Auto User", password_hash="dummy")
+        db.add(user)
+        db.commit()
 
-    # 3. Execute the code against test cases
+    # Execute code
     executor = CodeExecutor()
     result = executor.execute(req.code, problem.test_cases)
 
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
 
-    # 4. Store the submission in database
+    # Detect mistakes
+    mistake_result = MistakeDetector.analyze_code(req.code, result)
+    mistake_types = mistake_result["mistakes"]
+    primary_mistake = mistake_result.get("primary_mistake", "")
+    
+    # Format detailed mistake messages
+    mistake_details = [
+        {"type": m, "message": MistakeDetector.get_mistake_message(m)}
+        for m in mistake_types
+    ]
+
+    # Store submission
     submission = Submission(
         id=str(uuid.uuid4()),
         user_id=req.user_id,
@@ -60,15 +72,21 @@ async def execute_code(req: ExecuteRequest, db: Session = Depends(get_db)):
         code=req.code,
         passed=result["passed"],
         passed_count=result["passed_count"],
-        total_count=result["total_count"]
+        total_count=result["total_count"],
+        mistakes=mistake_types
     )
     db.add(submission)
     db.commit()
 
-    # 5. Return the results
+    # Update knowledge profile
+    KnowledgeTracker.update_profile(db, req.user_id, submission, mistake_types)
+
     return ExecuteResponse(
         passed=result["passed"],
         passed_count=result["passed_count"],
         total_count=result["total_count"],
-        results=result["results"]
+        results=result["results"],
+        mistakes=mistake_types,
+        primary_mistake=primary_mistake,
+        mistake_details=mistake_details
     )

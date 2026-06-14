@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import Column, String, Integer, DateTime, Text, JSON, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -36,11 +37,12 @@ class Submission(Base):
     passed_count = Column(Integer, default=0)    # How many tests passed
     total_count = Column(Integer, default=0)     # Total tests
     created_at = Column(DateTime, default=datetime.utcnow)
+    mistakes = Column(JSON, default=list)  # store list of mistake types
 
 class MistakeProfile(Base):
 
     __tablename__ = "mistake_profiles"
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id"), unique=True, nullable=False)
 
     # Knowledge state (0-100 scale)

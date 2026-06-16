@@ -12,11 +12,14 @@ export default function ProblemPage() {
 
   const [progress, setProgress] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
+  const [mistakeDna, setMistakeDna] = useState(null);
+  const [showMistakeDna, setShowMistakeDna] = useState(false);
   
   // Fetch a problem when component loads
   useEffect(() => {
     fetchProblem('prob_easy_1');
     fetchProgress();
+    fetchMistakeDna();
   }, []);
 
   const fetchProblem = async (problemId) => {
@@ -39,6 +42,17 @@ export default function ProblemPage() {
     }
   };
 
+  const fetchMistakeDna = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/mistake-dna/user/${USER_ID}`);
+      setMistakeDna(res.data);
+    } catch (err) {
+      console.error("Failed to fetch mistake DNA", err);
+    }
+  };
+
+  
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -48,7 +62,8 @@ export default function ProblemPage() {
         user_id: USER_ID
       });
       setResult(res.data);
-      fetchProgress(); // Refresh progress immediately after submission
+      fetchProgress();
+      fetchMistakeDna();
     } catch (err) {
       setResult({ error: err.response?.data?.detail || err.message });
     }
@@ -388,6 +403,51 @@ export default function ProblemPage() {
           font-size: 0.8rem;
           color: #94a3b8;
         }
+
+        .mistake-dna-panel {
+          margin-top: 20px;
+          background: #0f172a;
+          border: 1px solid #334155;
+          border-radius: 8px;
+          padding: 20px;
+        }
+
+        .mistake-dna-panel h3 {
+          margin: 0 0 16px 0;
+          color: #c084fc;
+          font-size: 1.2rem;
+        }
+
+        .mistake-dna-panel h4 {
+          margin: 16px 0 8px 0;
+          color: #94a3b8;
+          font-size: 0.95rem;
+          font-weight: 600;
+        }
+
+        .mistake-dna-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .mistake-dna-list li {
+          padding: 6px 0;
+          color: #cbd5e1;
+          font-size: 0.9rem;
+          text-transform: capitalize;
+        }
+
+        .mistake-dna-recommendation {
+          margin-top: 16px;
+          padding: 12px 16px;
+          background: rgba(99, 102, 241, 0.1);
+          border: 1px solid rgba(99, 102, 241, 0.3);
+          border-radius: 8px;
+          color: #cbd5e1;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
       `}</style>
 
       {/* Header */}
@@ -516,12 +576,20 @@ export default function ProblemPage() {
 
       {/* Progress & topic tracking */}
       <div className="progress-section">
-        <button
-          onClick={() => setShowProgress(!showProgress)}
-          className="toggle-progress-btn"
-        >
-          <span>{showProgress ? '🔼' : '🔽'}</span> {showProgress ? 'Hide My Progress' : 'Show My Progress'}
-        </button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          <button
+            onClick={() => setShowProgress(!showProgress)}
+            className="toggle-progress-btn"
+          >
+            <span>{showProgress ? '🔼' : '🔽'}</span> {showProgress ? 'Hide My Progress' : 'Show My Progress'}
+          </button>
+          <button
+            onClick={() => setShowMistakeDna(!showMistakeDna)}
+            className="toggle-progress-btn"
+          >
+            <span>{showMistakeDna ? '🔼' : '🧬'}</span> {showMistakeDna ? 'Hide Mistake DNA' : 'Show Mistake DNA'}
+          </button>
+        </div>
 
         {showProgress && progress && (
           <div>
@@ -561,6 +629,38 @@ export default function ProblemPage() {
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {showMistakeDna && mistakeDna && (
+          <div className="mistake-dna-panel">
+            <h3>🧬 Your Mistake DNA</h3>
+
+            {Object.keys(mistakeDna.mastery).length > 0 ? (
+              <>
+                <h4>Mastery by Topic</h4>
+                <ul className="mistake-dna-list">
+                  {Object.entries(mistakeDna.mastery).map(([topic, score]) => (
+                    <li key={topic}><strong>{topic}:</strong> {score}%</li>
+                  ))}
+                </ul>
+
+                <h4>Mistake Patterns</h4>
+                <ul className="mistake-dna-list">
+                  {Object.entries(mistakeDna.mistakes).map(([type, count]) => (
+                    <li key={type}><strong>{type.replace(/_/g, ' ')}:</strong> {count} times</li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p style={{ color: '#94a3b8', margin: 0 }}>{mistakeDna.recommendation}</p>
+            )}
+
+            {Object.keys(mistakeDna.mastery).length > 0 && (
+              <p className="mistake-dna-recommendation">
+                <strong>📌 Recommendation:</strong> {mistakeDna.recommendation.replace(/\*\*/g, '')}
+              </p>
             )}
           </div>
         )}

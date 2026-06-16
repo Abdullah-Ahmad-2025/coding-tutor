@@ -14,6 +14,8 @@ export default function ProblemPage() {
   const [showProgress, setShowProgress] = useState(false);
   const [mistakeDna, setMistakeDna] = useState(null);
   const [showMistakeDna, setShowMistakeDna] = useState(false);
+  const [hint, setHint] = useState(null);
+  const [loadingHint, setLoadingHint] = useState(false);
   
   // Fetch a problem when component loads
   useEffect(() => {
@@ -55,6 +57,7 @@ export default function ProblemPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setHint(null);
     try {
       const res = await axios.post('http://localhost:8000/api/execute', {
         code: code,
@@ -68,6 +71,23 @@ export default function ProblemPage() {
       setResult({ error: err.response?.data?.detail || err.message });
     }
     setLoading(false);
+  };
+
+  const requestHint = async () => {
+    setLoadingHint(true);
+    try {
+      const res = await axios.post('http://localhost:8000/api/hints/generate', {
+        problem_description: problem.description,
+        user_code: code,
+        test_results: result.results,
+        mistakes: result.mistakes || [],
+      });
+      setHint(res.data.hint);
+    } catch (err) {
+      console.error('Failed to generate hint', err);
+      setHint('Failed to generate hint. Please try again.');
+    }
+    setLoadingHint(false);
   };
 
   const getMistakeTitle = (type) => {
@@ -448,6 +468,46 @@ export default function ProblemPage() {
           font-size: 0.92rem;
           line-height: 1.5;
         }
+
+        .hint-btn {
+          background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+          color: #ffffff;
+          border: none;
+          border-radius: 8px;
+          padding: 10px 20px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: opacity 0.2s, box-shadow 0.2s;
+          box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+        }
+
+        .hint-btn:hover:not(:disabled) {
+          opacity: 0.9;
+          box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+        }
+
+        .hint-btn:disabled {
+          background: #334155;
+          color: #64748b;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        .hint-panel {
+          margin-top: 15px;
+          padding: 14px 18px;
+          background: rgba(245, 158, 11, 0.08);
+          border: 1px solid rgba(245, 158, 11, 0.3);
+          border-radius: 8px;
+          color: #fde68a;
+          font-size: 0.92rem;
+          line-height: 1.6;
+        }
+
+        .hint-panel strong {
+          color: #fbbf24;
+        }
       `}</style>
 
       {/* Header */}
@@ -567,6 +627,23 @@ export default function ProblemPage() {
                       </div>
                     ))}
                   </div>
+
+                  {!result.passed && (
+                    <div style={{ marginTop: '20px' }}>
+                      <button
+                        onClick={requestHint}
+                        disabled={loadingHint}
+                        className="hint-btn"
+                      >
+                        {loadingHint ? 'Generating hint...' : '💡 Get Hint'}
+                      </button>
+                      {hint && (
+                        <div className="hint-panel">
+                          <strong>Hint:</strong> {hint}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>

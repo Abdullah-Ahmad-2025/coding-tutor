@@ -17,12 +17,22 @@ export default function ProblemPage() {
   const [hint, setHint] = useState(null);
   const [loadingHint, setLoadingHint] = useState(false);
   
-  // Fetch a problem when component loads
+  // Fetch recommended problem when component loads
   useEffect(() => {
-    fetchProblem('prob_easy_1');
+    fetchRecommendedProblem();
     fetchProgress();
     fetchMistakeDna();
   }, []);
+
+  const fetchRecommendedProblem = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/problems/recommended/${USER_ID}`);
+      fetchProblem(res.data.id);
+    } catch (err) {
+      console.error('Failed to fetch recommended problem', err);
+      fetchProblem('prob_easy_1');
+    }
+  };
 
   const fetchProblem = async (problemId) => {
     try {

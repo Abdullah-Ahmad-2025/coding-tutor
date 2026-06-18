@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.models.schema import Problem
 from backend.database import get_db
+from backend.models.schema import Problem
+from backend.services.problem_recommender import ProblemRecommender
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
+
 
 @router.get("/")
 def get_all_problems(db: Session = Depends(get_db)):
@@ -14,10 +16,29 @@ def get_all_problems(db: Session = Depends(get_db)):
             "id": p.id,
             "title": p.title,
             "difficulty": p.difficulty,
-            "topic": p.topic
+            "topic": p.topic,
         }
         for p in problems
     ]
+
+
+@router.get("/recommended/{user_id}")
+async def get_recommended_problem(user_id: str, db: Session = Depends(get_db)):
+    """Get a recommended problem for the user."""
+    problem = ProblemRecommender.get_recommendation(db, user_id)
+
+    if not problem:
+        raise HTTPException(status_code=404, detail="No problems available")
+
+    return {
+        "id": problem.id,
+        "title": problem.title,
+        "description": problem.description,
+        "difficulty": problem.difficulty,
+        "topic": problem.topic,
+        "starter_code": problem.starter_code,
+    }
+
 
 @router.get("/{problem_id}")
 def get_problem(problem_id: str, db: Session = Depends(get_db)):
@@ -32,5 +53,5 @@ def get_problem(problem_id: str, db: Session = Depends(get_db)):
         "difficulty": problem.difficulty,
         "topic": problem.topic,
         "starter_code": problem.starter_code,
-        "test_cases": problem.test_cases
+        "test_cases": problem.test_cases,
     }

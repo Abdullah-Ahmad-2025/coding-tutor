@@ -46,6 +46,10 @@ async def execute_code(req: ExecuteRequest, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
 
+    # Reject empty submissions
+    if not req.code or not req.code.strip():
+        raise HTTPException(status_code=400, detail="Code cannot be empty. Please write your solution before submitting.")
+
     # Execute code
     executor = CodeExecutor()
     result = executor.execute(req.code, problem.test_cases)

@@ -22,11 +22,13 @@ def get_mistake_dna(user_id: str, db: Session = Depends(get_db)):
 
     # Collect mastery scores (0-100)
     mastery = {
+        "basics": profile.basics_mastery,
         "loops": profile.loops_mastery,
         "functions": profile.functions_mastery,
         "recursion": profile.recursion_mastery,
         "arrays": profile.arrays_mastery,
-        "dicts": profile.dicts_mastery
+        "dicts": profile.dicts_mastery,
+        "strings": profile.strings_mastery
     }
 
     # Collect mistake counts
@@ -34,7 +36,12 @@ def get_mistake_dna(user_id: str, db: Session = Depends(get_db)):
         "syntax_errors": profile.syntax_errors,
         "index_errors": profile.index_errors,
         "logic_errors": profile.logic_errors,
-        "recursion_errors": profile.recursion_errors
+        "recursion_errors": profile.recursion_errors,
+        "potential_missing_base_case_errors": profile.potential_missing_base_case_errors,
+        "shadowing_builtin_errors": profile.shadowing_builtin_errors,
+        "invalid_len_method_errors": profile.invalid_len_method_errors,
+        "invalid_keyword_elsif_errors": profile.invalid_keyword_elsif_errors,
+        "incorrect_none_comparison_errors": profile.incorrect_none_comparison_errors
     }
 
     # Generate recommendation based on weakest area

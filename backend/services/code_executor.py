@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import os
+import re
 import signal
 import time
 from typing import Dict, List, Any
@@ -17,6 +18,30 @@ class CodeExecutor:
 
         test_cases: [{"input": "5", "expected_output": "120"}, ...]
         """
+        # Security scan: Strip comments and strings to prevent false positives, then check for dangerous patterns
+        clean_code = re.sub(r'#.*', '', code)
+        clean_code = re.sub(
+            r'(\"\"\"[\s\S]*?\"\"\"|\'\'\'[\s\S]*?\'\'\'|"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\')',
+            '',
+            clean_code
+        )
+        
+        dangerous_patterns = [
+            r'\bimport\s+(os|sys|subprocess|shutil|socket|urllib|requests|pty|platform|builtins)\b',
+            r'\bfrom\s+(os|sys|subprocess|shutil|socket|urllib|requests|pty|platform|builtins)\b',
+            r'\b(eval|exec|open|__import__|compile)\s*\(',
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, clean_code):
+                return {
+                    "results": [],
+                    "passed": False,
+                    "passed_count": 0,
+                    "total_count": len(test_cases),
+                    "error": "Security Block: Execution of unsafe modules or functions (like os, sys, eval, exec, open) is restricted."
+                }
+
         results = []
         passed_count = 0
 

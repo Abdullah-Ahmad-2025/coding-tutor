@@ -58,7 +58,8 @@ print(add(int(input()), int(input())))
     assert profile.id is not None
     assert len(profile.id) > 0
     print(f"\n[SUCCESS] MistakeProfile successfully created with generated ID: {profile.id}")
-    print(f"  Basics Mastery: {profile.loops_mastery}%")
+    print(f"  Basics Mastery: {profile.basics_mastery}%")
+    assert profile.basics_mastery == 10
     print(f"  Syntax Errors Count: {profile.syntax_errors}")
     print(f"  Index Errors Count: {profile.index_errors}")
     print(f"  Recursion Errors Count: {profile.recursion_errors}")

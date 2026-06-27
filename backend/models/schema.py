@@ -46,16 +46,23 @@ class MistakeProfile(Base):
     user_id = Column(String, ForeignKey("users.id"), unique=True, nullable=False)
 
     # Knowledge state (0-100 scale)
+    basics_mastery = Column(Integer, default=0)
     loops_mastery = Column(Integer, default=0)
     functions_mastery = Column(Integer, default=0)
     recursion_mastery = Column(Integer, default=0)
     arrays_mastery = Column(Integer, default=0)
     dicts_mastery = Column(Integer, default=0)
+    strings_mastery = Column(Integer, default=0)
 
     # Mistake DNA counters!
     syntax_errors = Column(Integer, default=0)
     index_errors = Column(Integer, default=0)
     logic_errors = Column(Integer, default=0)
     recursion_errors = Column(Integer, default=0)
+    potential_missing_base_case_errors = Column(Integer, default=0)
+    shadowing_builtin_errors = Column(Integer, default=0)
+    invalid_len_method_errors = Column(Integer, default=0)
+    invalid_keyword_elsif_errors = Column(Integer, default=0)
+    incorrect_none_comparison_errors = Column(Integer, default=0)
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

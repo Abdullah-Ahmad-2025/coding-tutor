@@ -19,11 +19,13 @@ class ProblemRecommender:
 
         # Find weakest topic (lowest mastery)
         topics = [
+            ("basics", profile.basics_mastery),
             ("loops", profile.loops_mastery),
             ("functions", profile.functions_mastery),
             ("recursion", profile.recursion_mastery),
             ("arrays", profile.arrays_mastery),
-            ("dicts", profile.dicts_mastery)
+            ("dicts", profile.dicts_mastery),
+            ("strings", profile.strings_mastery)
         ]
         weakest_topic, weakest_score = min(topics, key=lambda x: x[1])
 

@@ -7,22 +7,31 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE_URL = os.getenv("DATABASE_URL")
+
 if not DATABASE_URL:
+    # Local development fallback: SQLite
     DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'coding_tutor.db')}"
-elif DATABASE_URL.startswith("sqlite:///"):
-    db_path = DATABASE_URL[10:]
-    if db_path.startswith("./"):
-        db_path = db_path[2:]
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+
+elif DATABASE_URL.startswith("sqlite"):
+    # Explicit SQLite path (local override)
+    db_path = DATABASE_URL[len("sqlite:///"):]
     if not os.path.isabs(db_path):
         DATABASE_URL = f"sqlite:///{os.path.abspath(os.path.join(BASE_DIR, db_path))}"
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-# Create engine
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {})
+else:
+    # PostgreSQL (Neon, Supabase, Railway, etc.)
+    # Neon requires SSL — add sslmode=require if not already present
+    if "sslmode" not in DATABASE_URL:
+        separator = "&" if "?" in DATABASE_URL else "?"
+        DATABASE_URL = f"{DATABASE_URL}{separator}sslmode=require"
+    engine = create_engine(DATABASE_URL)
 
-# Create session factory
+# Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Dependency to get DB session (for FastAPI routes)
+# FastAPI dependency
 def get_db():
     db = SessionLocal()
     try:

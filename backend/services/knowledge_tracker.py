@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models.schema import MistakeProfile, Problem, Submission
+from models.schema import MistakeProfile, Problem, Submission
 
 class KnowledgeTracker:
     """Update student's knowledge/mistake profile after each submission."""

@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api.execute import router as execute_router
-from backend.api.problems import router as problems_router  # added this
-from backend.api.auth import router as auth_router # added this for authentication
-from backend.api.progress import router as progress_router 
-from backend.api.mistake_dna import router as mistake_dna_router
-from backend.api.hints import router as hints_router
+from api.execute import router as execute_router
+from api.problems import router as problems_router
+from api.auth import router as auth_router
+from api.progress import router as progress_router
+from api.mistake_dna import router as mistake_dna_router
+from api.hints import router as hints_router
 
 app = FastAPI(title="Coding Tutor")
 
@@ -22,7 +22,7 @@ def health():
     return {"status": "ok", "message": "Backend running"}
 
 app.include_router(execute_router)
-app.include_router(problems_router)  # added this
+app.include_router(problems_router)
 app.include_router(auth_router)
 app.include_router(progress_router)
 app.include_router(mistake_dna_router)

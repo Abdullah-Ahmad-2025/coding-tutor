@@ -3,9 +3,9 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 import uuid
 
-from backend.models.schema import User
-from backend.database import get_db
-from backend.services.auth import hash_password, verify_password, create_token
+from models.schema import User
+from database import get_db
+from services.auth import hash_password, verify_password, create_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 

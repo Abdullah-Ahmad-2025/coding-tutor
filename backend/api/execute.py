@@ -3,11 +3,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import uuid
 
-from backend.services.code_executor import CodeExecutor
-from backend.services.mistake_detector import MistakeDetector
-from backend.services.knowledge_tracker import KnowledgeTracker
-from backend.models.schema import Problem, Submission, User
-from backend.database import get_db
+from services.code_executor import CodeExecutor
+from services.mistake_detector import MistakeDetector
+from services.knowledge_tracker import KnowledgeTracker
+from models.schema import Problem, Submission, User
+from database import get_db
 
 router = APIRouter(prefix="/api", tags=["execute"])
 

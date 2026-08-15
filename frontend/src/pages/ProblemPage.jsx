@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Editor from '@monaco-editor/react';
 
-const API = 'http://localhost:8000';
+const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // ─── Difficulty badge colors ─────────────────────────────────────────────────
 const DIFF_COLORS = {

@@ -1,37 +1,51 @@
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent
+
+
+def normalize_database_url(database_url: str) -> str:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    if database_url.startswith("sqlite:///"):
+        sqlite_path = database_url.replace("sqlite:///", "", 1)
+        if sqlite_path and not os.path.isabs(sqlite_path):
+            database_url = f"sqlite:///{(BASE_DIR / sqlite_path).resolve()}"
+        return database_url
+
+    if database_url.startswith("postgresql://") and "sslmode=" not in database_url:
+        separator = "&" if "?" in database_url else "?"
+        database_url = f"{database_url}{separator}sslmode=require"
+
+    return database_url
+
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    # Local development fallback: SQLite
-    DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'coding_tutor.db')}"
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+    raise ValueError("DATABASE_URL environment variable is not set")
 
-elif DATABASE_URL.startswith("sqlite"):
-    # Explicit SQLite path (local override)
-    db_path = DATABASE_URL[len("sqlite:///"):]
-    if not os.path.isabs(db_path):
-        DATABASE_URL = f"sqlite:///{os.path.abspath(os.path.join(BASE_DIR, db_path))}"
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+DATABASE_URL = normalize_database_url(DATABASE_URL)
 
-else:
-    # PostgreSQL (Neon, Supabase, Railway, etc.)
-    # Neon requires SSL — add sslmode=require if not already present
-    if "sslmode" not in DATABASE_URL:
-        separator = "&" if "?" in DATABASE_URL else "?"
-        DATABASE_URL = f"{DATABASE_URL}{separator}sslmode=require"
-    engine = create_engine(DATABASE_URL)
+engine_kwargs = {
+    "pool_pre_ping": True,
+}
 
-# Session factory
+if DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# FastAPI dependency
+
 def get_db():
     db = SessionLocal()
     try:

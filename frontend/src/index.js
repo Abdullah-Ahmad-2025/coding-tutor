@@ -62,39 +62,16 @@ if (window.ResizeObserver) {
   window.ResizeObserver = function (callback) {
     const wrappedCallback = function (entries, observer) {
       try {
-        // Use requestAnimationFrame to defer callback and prevent loop
-        requestAnimationFrame(() => {
-          try {
-            callback(entries, observer);
-          } catch (e) {
-            // Silently swallow all ResizeObserver-related errors
-            if (e.message && (e.message.includes('ResizeObserver') || e.message.includes('loop'))) {
-              return;
-            }
-            throw e;
-          }
-        });
+        callback(entries, observer);
       } catch (e) {
-        // Silently swallow all ResizeObserver-related errors
-        if (e.message && (e.message.includes('ResizeObserver') || e.message.includes('loop'))) {
-          return;
+        if (e.message && e.message.includes('ResizeObserver')) {
+          // Swallow the error silently
+        } else {
+          throw e;
         }
-        throw e;
       }
     };
-    const observer = new OriginalResizeObserver(wrappedCallback);
-    
-    // Wrap disconnect to prevent errors during cleanup
-    const originalDisconnect = observer.disconnect.bind(observer);
-    observer.disconnect = function () {
-      try {
-        originalDisconnect();
-      } catch (e) {
-        // Ignore disconnect errors
-      }
-    };
-    
-    return observer;
+    return new OriginalResizeObserver(wrappedCallback);
   };
   // Copy prototype methods
   window.ResizeObserver.prototype = OriginalResizeObserver.prototype;

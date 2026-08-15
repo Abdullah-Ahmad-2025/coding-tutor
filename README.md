@@ -24,7 +24,7 @@ graph TD
         LLM[Groq Hint Generator]
     end
 
-    subgraph DB [SQLite Database]
+    subgraph DB [PostgreSQL / Neon Database]
         UsersTable[(Users Table)]
         ProblemsTable[(Problems Table)]
         SubmissionsTable[(Submissions Table)]
@@ -68,7 +68,7 @@ graph TD
 | **Frontend** | React (Hooks, Axios, LocalStorage) |
 | **Code Editor** | Monaco Editor (`@monaco-editor/react`) |
 | **Backend** | FastAPI (Python 3.11, Pydantic, SQLAlchemy ORM) |
-| **Database** | SQLite |
+| **Database** | PostgreSQL (Neon-compatible) |
 | **AI / LLM** | Groq API (`llama-3.3-70b-versatile`) |
 | **Authentication** | JWT Tokens (`python-jose`) & Password Hashing (`bcrypt` + `passlib`) |
 
@@ -104,11 +104,17 @@ Create a `.env` file in the root directory (you can copy `.env.example` as a tem
 # Groq API Key (Obtain from https://console.groq.com/ for free)
 GROQ_API_KEY=your_groq_api_key_here
 
-# Database URI (Defaults to local SQLite)
-DATABASE_URL=sqlite:///./coding_tutor.db
+# Database URI
+# Neon / PostgreSQL:
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB_NAME?sslmode=require
+# Local SQLite:
+# DATABASE_URL=sqlite:///./coding_tutor.db
 
 # JWT Secret Key
 SECRET_KEY=your-super-secret-key-change-in-production
+
+# Frontend origins allowed to call the API
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://your-frontend-domain.vercel.app
 ```
 
 ### 3. Initialize and Seed the Database
@@ -117,6 +123,8 @@ From the project root:
 python backend/init_db.py
 python backend/seed_problems.py
 ```
+
+If you are using Neon, make sure the `DATABASE_URL` points to your pooled Neon connection string and includes `sslmode=require`.
 
 ### 4. Run the Backend Server
 ```bash
@@ -136,6 +144,34 @@ npm install
 npm start
 ```
 The React development server will start at `http://localhost:3000`.
+
+### Git Bash commands
+If you prefer Git Bash on Windows, these commands work from the repository root:
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
+pip install -r requirements.txt
+python backend/init_db.py
+python backend/seed_problems.py
+uvicorn backend.main:app --reload --port 8000
+```
+
+In another Git Bash tab:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+## Deployment notes
+
+- Backend: deploy the FastAPI app with `backend/main.py` as the entrypoint.
+- Database: use a Neon PostgreSQL connection string in `DATABASE_URL`.
+- Frontend: set `REACT_APP_API_URL` only when the frontend is hosted on a different origin than the backend.
+- CORS: set `CORS_ALLOWED_ORIGINS` to your deployed frontend URL.
+- First boot: the backend now creates tables automatically and seeds the starter problems if the database is empty.
 
 ---
 

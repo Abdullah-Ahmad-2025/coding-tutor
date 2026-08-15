@@ -701,16 +701,10 @@ export default function ProblemPage() {
                         value={code}
                         onChange={v => setCode(v || '')}
                         options={{
-                          fontSize: 16,
-                          fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace",
-                          fontLigatures: true,
-                          minimap: {enabled: false},
-                          scrollBeyondLastLine: false,
-                          lineNumbers: 'on',
-                          automaticLayout: true,
-                          tabSize: 4,
+                          fontSize: 14, minimap: {enabled: false},
+                          scrollBeyondLastLine: false, lineNumbers: 'on',
+                          automaticLayout: true, tabSize: 4,
                           padding: {top: 12, bottom: 12},
-                          wordWrap: 'on',
                         }}
                       />
                     </div>

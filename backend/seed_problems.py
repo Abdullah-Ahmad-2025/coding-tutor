@@ -7,11 +7,17 @@ from backend.database import SessionLocal
 from backend.models.schema import Problem
 
 
-def seed_problems():
-    db = SessionLocal()
+def seed_problems(db=None, replace_existing=True):
+    owns_session = db is None
+    if owns_session:
+        db = SessionLocal()
 
-    # Clear existing
-    db.query(Problem).delete()
+    if replace_existing:
+        db.query(Problem).delete()
+    elif db.query(Problem).first():
+        if owns_session:
+            db.close()
+        return 0
 
     problems = [
         # ─────────────── EASY ───────────────
@@ -276,7 +282,11 @@ def seed_problems():
 
     db.commit()
     print(f"Seeded {len(problems)} problems successfully.")
-    db.close()
+
+    if owns_session:
+        db.close()
+
+    return len(problems)
 
 
 if __name__ == "__main__":

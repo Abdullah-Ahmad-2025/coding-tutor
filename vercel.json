@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "backend/main.py": {
+      "runtime": "python3.11",
+      "maxDuration": 30
+    }
+  },
   "builds": [
     {
       "src": "backend/main.py",
@@ -10,10 +16,5 @@
       "src": "/(.*)",
       "dest": "backend/main.py"
     }
-  ],
-  "functions": {
-    "backend/main.py": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }

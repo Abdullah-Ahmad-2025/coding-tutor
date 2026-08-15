@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
-from models.schema import MistakeProfile, User
+from backend.database import get_db
+from backend.models.schema import MistakeProfile, User
 
 router = APIRouter(prefix="/api/mistake-dna", tags=["mistake-dna"])
 

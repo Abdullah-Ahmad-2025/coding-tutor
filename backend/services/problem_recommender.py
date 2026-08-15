@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.schema import MistakeProfile, Problem, Submission
+from backend.models.schema import MistakeProfile, Problem, Submission
 
 class ProblemRecommender:
     """Recommend next problem based on student's weaknesses."""

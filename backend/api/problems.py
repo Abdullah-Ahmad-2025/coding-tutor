@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
-from models.schema import Problem
-from services.problem_recommender import ProblemRecommender
+from backend.database import get_db
+from backend.models.schema import Problem
+from backend.services.problem_recommender import ProblemRecommender
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 

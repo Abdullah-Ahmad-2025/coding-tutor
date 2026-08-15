@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
-from models.schema import User, Submission, Problem
+from backend.database import get_db
+from backend.models.schema import User, Submission, Problem
 
 router = APIRouter(prefix="/api/progress", tags=["progress"])
 

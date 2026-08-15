@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.hint_generator import HintGenerator
+from backend.services.hint_generator import HintGenerator
 
 router = APIRouter(prefix="/api/hints", tags=["hints"])
 

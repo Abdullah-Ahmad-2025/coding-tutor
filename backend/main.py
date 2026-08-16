@@ -12,11 +12,7 @@ app = FastAPI(title="Coding Tutor")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://coding-tutor.netlify.app",
-        "https://*.netlify.app",
-        "http://localhost:3000"
-    ],
+    allow_origins=["*"],  # Allow all origins temporarily (then restrict later)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

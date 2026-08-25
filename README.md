@@ -4,7 +4,7 @@ A full-stack AI-powered coding tutor that goes beyond pass/fail grading. Instead
 
 Built as an 8-week personal project to explore how machine learning, LLMs, and adaptive systems can work together in a real learning tool.
 
-**Live demo:** [smart-coding-tutor.netlify.app](https://smart-coding-tutor.netlify.app)
+**Live demo:** [smart-coding-tutor.netlify.app](https://codingtutors.netlify.app/)
 
 ---
 

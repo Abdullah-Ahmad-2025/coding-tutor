@@ -11,7 +11,7 @@ class HintGenerator:
         if not api_key:
             raise ValueError("GROQ_API_KEY not set in environment")
         self.llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-20b",
             temperature=0.7,
             api_key=api_key,
         )

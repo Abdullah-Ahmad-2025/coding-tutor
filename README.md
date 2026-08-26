@@ -29,7 +29,7 @@ On top of that, you can ask the Groq-powered LLM for a contextual hint or a deta
 - **Mistake DNA dashboard** — conic-gradient mastery rings per topic + colored bar chart of your mistake history
 - **Progress tracker** — solved count, total submissions, success rate, and per-topic mastery bars
 - **Adaptive recommendations** — picks your next problem based on your weakest topic and appropriate difficulty
-- **"Explain My Mistake" button** — per-mistake AI explanations using Llama 3.3 70B via Groq
+- **"Explain My Mistake" button** — per-mistake AI explanations using GPT-OSS 20B via Groq
 - **JWT auth** — sign up, log in, stay logged in across sessions
 - **Mobile responsive** — sidebar becomes a drawer overlay on small screens
 - **Empty code guard** — rejects blank submissions before they hit the executor
@@ -44,7 +44,7 @@ On top of that, you can ask the Groq-powered LLM for a contextual hint or a deta
 | Code Editor | Monaco Editor (`@monaco-editor/react`) |
 | Backend | FastAPI, Python 3.11, SQLAlchemy ORM, Pydantic |
 | Database | PostgreSQL (Railway) |
-| AI / LLM | Groq API — `llama-3.3-70b-versatile` via LangChain |
+| AI / LLM | Groq API — `openai/gpt-oss-20b` via LangChain |
 | Auth | JWT (`python-jose`), bcrypt password hashing (`passlib`) |
 | Frontend hosting | Netlify |
 | Backend hosting | Railway |

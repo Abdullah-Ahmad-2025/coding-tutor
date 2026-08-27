@@ -17,17 +17,49 @@ class ProblemRecommender:
             problem = db.query(Problem).filter(Problem.difficulty == "easy").first()
             return problem
 
-        # Find weakest topic (lowest mastery)
-        topics = [
-            ("basics", profile.basics_mastery),
-            ("loops", profile.loops_mastery),
-            ("functions", profile.functions_mastery),
-            ("recursion", profile.recursion_mastery),
-            ("arrays", profile.arrays_mastery),
-            ("dicts", profile.dicts_mastery),
-            ("strings", profile.strings_mastery)
+        # ============================================================
+        # FIX: Only consider topics the user has actually attempted
+        # ============================================================
+
+        # 1. Get all topics the user has attempted (via submissions)
+        attempted_topics = (
+            db.query(Problem.topic)
+            .join(Submission, Submission.problem_id == Problem.id)
+            .filter(Submission.user_id == user_id)
+            .distinct()
+            .all()
+        )
+        attempted_topic_names = [t[0] for t in attempted_topics]
+
+        # 2. If user hasn't attempted any problem yet, return an easy problem
+        if not attempted_topic_names:
+            problem = db.query(Problem).filter(Problem.difficulty == "easy").first()
+            return problem
+
+        # 3. Build mastery dictionary
+        mastery_map = {
+            "basics": profile.basics_mastery,
+            "loops": profile.loops_mastery,
+            "functions": profile.functions_mastery,
+            "recursion": profile.recursion_mastery,
+            "arrays": profile.arrays_mastery,
+            "dicts": profile.dicts_mastery,
+            "strings": profile.strings_mastery
+        }
+
+        # 4. Filter only topics the user has actually attempted
+        filtered_topics = [
+            (topic, mastery_map[topic])
+            for topic in attempted_topic_names
+            if topic in mastery_map
         ]
-        weakest_topic, weakest_score = min(topics, key=lambda x: x[1])
+
+        # 5. If for some reason no topics remain (should not happen), fallback
+        if not filtered_topics:
+            filtered_topics = list(mastery_map.items())
+
+        # 6. Find the weakest topic among those attempted
+        weakest_topic, weakest_score = min(filtered_topics, key=lambda x: x[1])
 
         # Determine difficulty based on mastery
         if weakest_score > 70:
@@ -69,7 +101,7 @@ class ProblemRecommender:
                 db.query(Problem).filter(Problem.difficulty == "easy")
             ).first()
 
-        # Last resort: any easy problem
+        # Last resort: any easy problem (even if already solved)
         if not problem:
             problem = db.query(Problem).filter(Problem.difficulty == "easy").first()
 
